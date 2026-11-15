@@ -10,7 +10,8 @@ const mime = { '.html': 'text/html', '.css': 'text/css', '.js': 'text/javascript
 const sitePath = '/classic-doom-touch/';
 const server = createServer((request, response) => {
   if (!request.url.startsWith(sitePath)) return response.writeHead(404).end();
-  const file = resolve(assets, request.url.slice(sitePath.length) || 'index.html');
+  const pathname = new URL(request.url, 'http://localhost').pathname;
+  const file = resolve(assets, pathname.slice(sitePath.length) || 'index.html');
   try {
     if (!file.startsWith(assets + '/') || !statSync(file).isFile()) throw Error();
     response.setHeader('Content-Type', mime[extname(file)] || 'application/octet-stream');
@@ -60,8 +61,16 @@ const server = createServer((request, response) => {
     // Headless Chromium's absolute mouse driver emits no relative movement under pointer lock.
     await desktop.locator('#touch').dispatchEvent('mousemove', { movementX: 100, bubbles: true });
     await desktop.waitForFunction(old => document.querySelector('#minimap').toDataURL() !== old, locked);
+    await desktop.waitForTimeout(350);
+    const lockedShot = await desktop.evaluate(() => window.shots);
+    await desktop.mouse.click(660, 320);
+    await desktop.waitForFunction(old => window.shots > old, lockedShot);
     await desktop.evaluate(() => document.exitPointerLock());
     await desktop.waitForFunction(() => !document.pointerLockElement);
+    await desktop.waitForTimeout(400);
+    const beforeJump = await desktop.locator('#screen').evaluate(canvas => canvas.toDataURL());
+    await desktop.keyboard.press('Space');
+    await desktop.waitForFunction(old => document.querySelector('#screen').toDataURL() !== old, beforeJump);
     await desktop.close();
 
     const page = await browser.newPage({ viewport: { width: 915, height: 412 }, hasTouch: true,
@@ -99,6 +108,10 @@ const server = createServer((request, response) => {
     await page.locator('#ok').tap(); // Default skill.
     await mode('level');
     await delay(300);
+    assert.equal(await page.locator('#jump').isVisible(), true);
+    const beforeTouchJump = await pixels();
+    await page.locator('#jump').tap();
+    await page.waitForFunction(old => document.querySelector('#screen').toDataURL() !== old, beforeTouchJump);
     const dimensions = () => page.locator('#screen').evaluate(canvas => [canvas.width, canvas.height]);
     const resolution = page.locator('#game-resolution');
     assert.deepEqual(await dimensions(), [640, 400]);
@@ -186,7 +199,7 @@ const server = createServer((request, response) => {
     assert.equal(await game.isVisible(), true);
     assert.deepEqual(errors, []);
     if (process.env.TEST_SCREENSHOT) await page.screenshot({ path: process.env.TEST_SCREENSHOT });
-    console.log('PASS: desktop mouse aiming, firing and pointer lock, resolution modes, viewport adaptation, saved preference, Pages subpath, invalid WAD, bundled launch, touch menus, three-finger movement/turn/fire, audio, map, pause, save, IWAD import, and reload.');
+    console.log('PASS: desktop mouse aiming, firing, pointer lock, keyboard and touch jump, resolution modes, viewport adaptation, saved preference, Pages subpath, invalid WAD, bundled launch, touch menus, three-finger movement/turn/fire, audio, map, pause, save, IWAD import, and reload.');
   } finally {
     await browser.close();
   }

@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "doomgeneric.h"
+#include "doomkeys.h"
 #include "d_event.h"
 #include "d_loop.h"
 #include "doomstat.h"
@@ -25,6 +26,7 @@ extern void sound_params(int, int, int) BROWSER(sound_params);
 static uint32_t milliseconds;
 static boolean prefix;
 static boolean sample_mouse;
+static boolean jump_requested;
 
 void DG_Init(void) {}
 void DG_SleepMs(uint32_t ms) { milliseconds += ms; }
@@ -41,6 +43,10 @@ int DG_GetKey(int *pressed, unsigned char *key)
         D_PostEvent(&mouse);
     }
     int event = take_key();
+    while ((event & 255) == KEY_JUMP) {
+        if (event & 0x100) jump_requested = true;
+        event = take_key();
+    }
     if (!event) return 0;
     *pressed = (event >> 8) & 1;
     *key = event & 255;
@@ -100,6 +106,15 @@ void start_doom(int game)
 __attribute__((export_name("step_doom")))
 void step_doom(void)
 {
+    if (jump_requested && gamestate == GS_LEVEL && !menuactive && !paused && !demoplayback) {
+        player_t *player = &players[consoleplayer];
+        mobj_t *actor = player->mo;
+        if (player->playerstate == PST_LIVE && actor && actor->z == actor->floorz &&
+            actor->momz == 0 && actor->ceilingz - actor->z > actor->height) {
+            actor->momz = 8 * FRACUNIT;
+        }
+    }
+    jump_requested = false;
     milliseconds += 29;
     sample_mouse = true;
     doomgeneric_Tick();

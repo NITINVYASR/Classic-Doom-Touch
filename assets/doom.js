@@ -55,11 +55,11 @@ const finePointer = matchMedia('(pointer: fine)');
 const mouseFire = 'mouse-fire';
 let previousMouseX;
 const key = { left: 0xac, up: 0xad, right: 0xae, down: 0xaf, strafeLeft: 0xa0,
-  strafeRight: 0xa1, use: 0xa2, fire: 0xa3, escape: 27, enter: 13, map: 9, swap: 93,
+  strafeRight: 0xa1, use: 0xa2, fire: 0xa3, jump: 0xa4, escape: 27, enter: 13, map: 9, swap: 93,
   run: 0xb6, save: 0xbc, load: 0xbd };
 const keyboard = { KeyW: key.up, KeyS: key.down, KeyA: key.strafeLeft, KeyD: key.strafeRight,
   ArrowUp: key.up, ArrowDown: key.down, ArrowLeft: key.left, ArrowRight: key.right,
-  ControlLeft: key.fire, ControlRight: key.fire, Space: key.use, KeyE: key.use,
+  ControlLeft: key.fire, ControlRight: key.fire, Space: key.jump, KeyE: key.use,
   ShiftLeft: key.run, ShiftRight: key.run, Escape: key.escape,
   Enter: key.enter, Tab: key.map, BracketRight: key.swap, F2: key.save, F3: key.load };
 const wadNames = ['freedoom1.wad', 'doom.wad', 'doom2.wad', 'doom1.wad', 'freedoom2.wad'];
@@ -144,26 +144,11 @@ function joystick(x, y) {
 }
 
 touch.addEventListener('pointerdown', event => {
-  if (!active) return;
-  if (event.pointerType === 'mouse' && event.button === 2 && mode === 'level') {
-    tap(key.use);
-    return;
-  }
-  if (event.button !== 0) return;
+  if (!active || event.button !== 0) return;
+  const button = event.target.closest('button');
+  if (event.pointerType === 'mouse' && (!button || document.pointerLockElement === touch)) return;
   event.preventDefault();
   if (document.activeElement instanceof HTMLSelectElement) document.activeElement.blur();
-  const button = event.target.closest('button');
-  if (event.pointerType === 'mouse' && (!button || document.pointerLockElement === touch)) {
-    setInputType('mouse');
-    if (mode === 'level') {
-      releases.delete(mouseFire);
-      hold(mouseFire, [key.fire]);
-      if (document.pointerLockElement !== touch) {
-        try { touch.requestPointerLock?.()?.catch(() => {}); } catch {}
-      }
-    }
-    return;
-  }
   if (event.pointerType !== 'mouse') {
     setInputType('touch');
     releaseMouse();
@@ -182,15 +167,7 @@ touch.addEventListener('pointerdown', event => {
 });
 
 touch.addEventListener('pointermove', event => {
-  if (event.pointerType === 'mouse') {
-    if (!active) return;
-    setInputType('mouse');
-    if (mode === 'level' && document.pointerLockElement !== touch && !event.target.closest('button')) {
-      if (previousMouseX !== undefined) turnBy(event.clientX - previousMouseX);
-      previousMouseX = event.clientX;
-    } else previousMouseX = undefined;
-    return;
-  }
+  if (event.pointerType === 'mouse') return;
   if (event.pointerId === moving) joystick(event.clientX, event.clientY);
   if (looking?.id === event.pointerId) {
     turnBy(event.clientX - looking.x);
@@ -198,17 +175,43 @@ touch.addEventListener('pointermove', event => {
   }
 });
 
-touch.addEventListener('pointerleave', () => { previousMouseX = undefined; });
 touch.addEventListener('contextmenu', event => event.preventDefault());
-function releaseFire(event) {
+window.addEventListener('mousedown', event => {
+  const locked = document.pointerLockElement === touch;
+  if (!active || mode !== 'level' || (!locked &&
+      (!touch.contains(event.target) || event.target.closest('button')))) return;
+  if (event.button !== 0 && event.button !== 2) return;
+  event.preventDefault();
+  if (document.activeElement instanceof HTMLSelectElement) document.activeElement.blur();
+  setInputType('mouse');
+  if (event.button === 2) {
+    tap(key.use);
+    return;
+  }
+  releases.delete(mouseFire);
+  hold(mouseFire, [key.fire]);
+  if (!locked) {
+    try { touch.requestPointerLock?.()?.catch(() => {}); } catch {}
+  }
+});
+window.addEventListener('mouseup', event => {
   if (event.button === 0 && controls.has(mouseFire)) releases.add(mouseFire);
-}
-window.addEventListener('mouseup', releaseFire);
-window.addEventListener('pointerup', event => {
-  if (event.pointerType === 'mouse') releaseFire(event);
 });
 document.addEventListener('mousemove', event => {
-  if (active && mode === 'level' && document.pointerLockElement === touch) turnBy(event.movementX);
+  if (!active) return;
+  if (document.pointerLockElement === touch) {
+    if (mode === 'level') turnBy(event.movementX);
+    return;
+  }
+  if (!touch.contains(event.target)) {
+    previousMouseX = undefined;
+    return;
+  }
+  setInputType('mouse');
+  if (mode === 'level' && !event.target.closest('button')) {
+    if (previousMouseX !== undefined) turnBy(event.clientX - previousMouseX);
+    previousMouseX = event.clientX;
+  } else previousMouseX = undefined;
 });
 document.addEventListener('pointerlockchange', () => {
   previousMouseX = undefined;
@@ -468,7 +471,7 @@ async function launch(file) {
       if (!response.ok) throw new Error('Could not load ' + name);
       return response.arrayBuffer();
     };
-    const [program, wad] = await Promise.all([load('doom.wasm'),
+    const [program, wad] = await Promise.all([load('doom.wasm?v=jump1'),
       file ? file.arrayBuffer() : load('freedoom1.wad')]);
     const bytes = new Uint8Array(wad);
     const type = file ? wadType(bytes, file.name) : 0;

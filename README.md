@@ -6,7 +6,7 @@ Classic Doom Touch brings the classic Doom engine to web browsers and Android us
 
 ## Play
 
-On a computer, use **WASD** to move, the **mouse** to aim, and **left click** to fire. Click the game during play to capture the cursor for continuous turning, and press **Esc** to release it. Use **right click**, **E**, or **Space** to interact, **Tab** for the map, **]** to cycle weapons, and **arrow keys + Enter** in Doom's menus. The game switches between desktop and touch controls as you use them.
+On a computer, use **WASD** to move, move the **mouse** to aim, and **left click** to fire. Click the game during play to capture the cursor for continuous turning, and press **Esc** to release it. Use **Space** to jump, **right click** or **E** to interact, **Tab** for the map, **]** to cycle weapons, and **arrow keys + Enter** in Doom's menus. The game switches between desktop and touch controls as you use them.
 
 Install `Classic_Doom_Touch.apk` on Android 7.0 or later with an up-to-date Android System WebView. Choose **Play Freedoom**, or choose **Open Doom WAD** and select your own `DOOM.WAD`, `DOOM2.WAD`, or compatible base-game IWAD. Choose **New Game** in the classic game menu.
 
@@ -16,6 +16,7 @@ Install `Classic_Doom_Touch.apk` on Android 7.0 or later with an up-to-date Andr
 | Right-side drag | Turn horizontally with increased, screen-width-normalized sensitivity. |
 | FIRE | Shoot. Hold to keep firing. |
 | USE | Open doors and operate switches. |
+| JUMP | Jump from the ground in the current browser build. |
 | SWAP | Cycle owned weapons. |
 | Minimap | Shows explored walls and your heading throughout a level. Tap for the full automap. |
 | MENU | Open or close Doom's menu. |

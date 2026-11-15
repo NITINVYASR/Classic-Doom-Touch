@@ -5,8 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; object-src 'none'; base-uri 'none'">
   <title>Classic Doom Touch</title>
-  <link rel="stylesheet" href="doom.css">
-  <script type="module" src="doom.js"></script>
+  <link rel="stylesheet" href="doom.css?v=jump1">
+  <script type="module" src="doom.js?v=jump1"></script>
 </head>
 <body>
   <main id="launcher">
@@ -30,9 +30,9 @@
       </div>
       <p id="status" role="status"></p>
       <p class="hint touch-hint">LEFT STICK TO MOVE · SWIPE THE RIGHT SIDE TO TURN<br>
-      TAP MENU TO PAUSE · MOVE THE STICK AND TAP OK IN DOOM MENUS</p>
+      TAP JUMP TO HOP · MOVE THE STICK AND TAP OK IN DOOM MENUS</p>
       <p class="hint mouse-hint">WASD TO MOVE · MOUSE TO AIM · LEFT CLICK TO FIRE<br>
-      RIGHT CLICK OR E TO USE · ARROWS AND ENTER FOR MENUS · ESC TO RELEASE THE MOUSE</p>
+      SPACE TO JUMP · RIGHT CLICK OR E TO USE · ARROWS AND ENTER FOR MENUS</p>
     </div>
   </main>
 
@@ -48,6 +48,7 @@
       <button id="swap" data-tap="swap">SWAP</button>
       <button id="use" data-hold="use">USE</button>
       <button id="fire" data-hold="fire">FIRE</button>
+      <button id="jump" data-tap="jump">JUMP</button>
       <button id="ok" data-tap="enter">OK</button>
     </div>
     <label class="resolution" id="game-display">Resolution
