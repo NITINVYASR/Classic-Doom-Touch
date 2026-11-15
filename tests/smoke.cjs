@@ -25,6 +25,45 @@ const server = createServer((request, response) => {
   const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_BIN || '/usr/bin/chromium',
     args: ['--no-sandbox'] });
   try {
+    const desktop = await browser.newPage({ viewport: { width: 1000, height: 700 } });
+    desktop.setDefaultTimeout(6000);
+    await desktop.addInitScript(() => {
+      window.shots = 0;
+      const start = AudioBufferSourceNode.prototype.start;
+      AudioBufferSourceNode.prototype.start = function (...args) {
+        window.shots++;
+        return start.apply(this, args);
+      };
+    });
+    const url = 'http://127.0.0.1:' + server.address().port + sitePath;
+    await desktop.goto(url);
+    await desktop.locator('#play').click();
+    const desktopGame = desktop.locator('#game');
+    await desktopGame.waitFor();
+    for (let i = 0; i < 4; i++) {
+      await desktop.keyboard.press('Enter', { delay: 55 });
+      await desktop.waitForTimeout(170);
+    }
+    await desktop.locator('#game[data-mode="level"]').waitFor();
+    assert.equal(await desktop.locator('#stick').isVisible(), false);
+    assert.equal(await desktop.locator('#map').isVisible(), true);
+    await desktop.mouse.move(500, 320);
+    const frame = () => desktop.locator('#minimap').evaluate(canvas => canvas.toDataURL());
+    const before = await frame();
+    await desktop.mouse.move(660, 320, { steps: 8 });
+    await desktop.waitForFunction(old => document.querySelector('#minimap').toDataURL() !== old, before);
+    const beforeShot = await desktop.evaluate(() => window.shots);
+    await desktop.mouse.click(660, 320, { delay: 90 });
+    await desktop.waitForFunction(old => window.shots > old, beforeShot);
+    await desktop.waitForFunction(() => document.pointerLockElement?.id === 'touch');
+    const locked = await frame();
+    // Headless Chromium's absolute mouse driver emits no relative movement under pointer lock.
+    await desktop.locator('#touch').dispatchEvent('mousemove', { movementX: 100, bubbles: true });
+    await desktop.waitForFunction(old => document.querySelector('#minimap').toDataURL() !== old, locked);
+    await desktop.evaluate(() => document.exitPointerLock());
+    await desktop.waitForFunction(() => !document.pointerLockElement);
+    await desktop.close();
+
     const page = await browser.newPage({ viewport: { width: 915, height: 412 }, hasTouch: true,
       isMobile: true, deviceScaleFactor: 1 });
     const errors = [];
@@ -40,7 +79,6 @@ const server = createServer((request, response) => {
         return start.apply(this, args);
       };
     });
-    const url = 'http://127.0.0.1:' + server.address().port + sitePath;
     const delay = ms => new Promise(done => setTimeout(done, ms));
     const game = page.locator('#game');
     const press = async key => { await page.keyboard.press(key, { delay: 48 }); await delay(120); };
@@ -148,7 +186,7 @@ const server = createServer((request, response) => {
     assert.equal(await game.isVisible(), true);
     assert.deepEqual(errors, []);
     if (process.env.TEST_SCREENSHOT) await page.screenshot({ path: process.env.TEST_SCREENSHOT });
-    console.log('PASS: resolution modes, viewport adaptation, saved preference, Pages subpath, invalid WAD, bundled launch, touch menus, three-finger movement/turn/fire, audio, map, pause, save, IWAD import, and reload.');
+    console.log('PASS: desktop mouse aiming, firing and pointer lock, resolution modes, viewport adaptation, saved preference, Pages subpath, invalid WAD, bundled launch, touch menus, three-finger movement/turn/fire, audio, map, pause, save, IWAD import, and reload.');
   } finally {
     await browser.close();
   }

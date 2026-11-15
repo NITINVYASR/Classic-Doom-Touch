@@ -2,7 +2,11 @@
 
 Classic Doom Touch brings the classic Doom engine to web browsers and Android using DoomGeneric. It includes Freedoom Phase 1, plus mobile touch controls, an always-visible minimap, adjustable browser resolution, and local Doom-family IWAD import.
 
+**[Play Classic Doom Touch in your browser](https://nitinvyasr.github.io/Classic-Doom-Touch/)** on a computer, phone, or tablet.
+
 ## Play
+
+On a computer, use **WASD** to move, the **mouse** to aim, and **left click** to fire. Click the game during play to capture the cursor for continuous turning, and press **Esc** to release it. Use **right click**, **E**, or **Space** to interact, **Tab** for the map, **]** to cycle weapons, and **arrow keys + Enter** in Doom's menus. The game switches between desktop and touch controls as you use them.
 
 Install `Classic_Doom_Touch.apk` on Android 7.0 or later with an up-to-date Android System WebView. Choose **Play Freedoom**, or choose **Open Doom WAD** and select your own `DOOM.WAD`, `DOOM2.WAD`, or compatible base-game IWAD. Choose **New Game** in the classic game menu.
 
@@ -57,7 +61,7 @@ Classic Doom Touch is open source under [GPL-2.0-or-later](LICENSE). The bundled
 
 ## Play in a browser
 
-Run `./scripts/fetch-freedoom.sh` once to fetch and verify Freedoom. Then run `python3 -m http.server 8000 --bind 127.0.0.1 --directory assets` from the project root and open [localhost:8000](http://localhost:8000/). Use the touch controls, or use WASD, the arrow keys, Ctrl, and Space on a keyboard.
+To run locally, use `./scripts/fetch-freedoom.sh` once to fetch and verify Freedoom. Then run `python3 -m http.server 8000 --bind 127.0.0.1 --directory assets` from the project root and open [localhost:8000](http://localhost:8000/).
 
 The **Resolution** control is available on the launch screen and during play. **Auto** fits the browser and accounts for display pixel density. The four fixed choices set the canvas output from 320 × 200 to 1280 × 800. The classic engine renders at 320 × 200 internally and the browser scales its output. The selected setting is remembered on the same browser origin.
 

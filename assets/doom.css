@@ -30,6 +30,8 @@ button:active { filter: brightness(1.35); } button:disabled { opacity: .55; }
 #use { right: max(95px, calc(env(safe-area-inset-right) + 85px)); bottom: max(14px, env(safe-area-inset-bottom)); width: clamp(49px, 14vh, 65px); }
 #swap { right: max(17px, env(safe-area-inset-right)); bottom: calc(max(20px, env(safe-area-inset-bottom)) + clamp(67px, 22vh, 98px)); width: clamp(49px, 14vh, 65px); }
 #game[data-mode="level"] #ok, #game[data-mode="menu"] :is(#fire, #use, #swap) { display: none; }
+body[data-input="mouse"] :is(.touch-hint, #stick, #fire, #use, #swap, #ok),
+body[data-input="touch"] .mouse-hint { display: none; }
 
 .resolution { display: inline-flex; align-items: center; gap: 7px; color: var(--paper); font-size: 12px; }
 .resolution select { min-height: 36px; padding: 4px; background: #201715; color: var(--paper); border: 1px solid #f3c7a37f; border-radius: 5px; font: inherit; }
