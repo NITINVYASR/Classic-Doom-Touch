@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; object-src 'none'; base-uri 'none'">
+  <title>Classic Doom Touch</title>
+  <link rel="stylesheet" href="doom.css">
+  <script type="module" src="doom.js"></script>
+</head>
+<body>
+  <main id="launcher">
+    <div class="launch-content">
+      <p class="tag">OFFLINE / CLASSIC ENGINE / TOUCH EDITION</p>
+      <h1>CLASSIC<br>DOOM<span>.</span></h1>
+      <p>Play the original engine with Freedoom Phase 1, or load your own Doom game file.</p>
+      <div class="actions">
+        <button id="play" class="primary">PLAY FREEDOOM</button>
+        <button id="import">OPEN DOOM WAD</button>
+        <label class="resolution">Resolution
+          <select id="launch-resolution">
+          <option value="auto">Auto</option>
+          <option value="1">320 × 200</option>
+          <option value="2">640 × 400</option>
+          <option value="3">960 × 600</option>
+          <option value="4">1280 × 800</option>
+          </select>
+        </label>
+        <input type="file" id="wad" hidden>
+      </div>
+      <p id="status" role="status"></p>
+      <p class="hint">MOVE WITH THE LEFT STICK · DRAG THE RIGHT SIDE TO TURN<br>
+      TAP MENU TO PAUSE · MOVE THE STICK AND TAP OK IN DOOM MENUS<br>
+      KEYBOARD · WASD TO MOVE · ARROWS TO TURN · CTRL TO FIRE · SPACE TO USE</p>
+    </div>
+  </main>
+
+  <section id="game" hidden aria-label="Doom game">
+    <canvas id="screen" width="640" height="400" aria-label="Doom display"></canvas>
+    <div id="touch">
+      <div id="stick" aria-label="Move joystick"><div id="thumb"></div></div>
+      <button id="menu" data-tap="escape">MENU</button>
+      <button id="map" data-tap="map" aria-label="Toggle full automap" hidden>
+        <canvas id="minimap" width="160" height="160" aria-hidden="true"></canvas>
+        <span>MAP</span>
+      </button>
+      <button id="swap" data-tap="swap">SWAP</button>
+      <button id="use" data-hold="use">USE</button>
+      <button id="fire" data-hold="fire">FIRE</button>
+      <button id="ok" data-tap="enter">OK</button>
+    </div>
+    <label class="resolution" id="game-display">Resolution
+      <select id="game-resolution">
+          <option value="auto">Auto</option>
+          <option value="1">320 × 200</option>
+          <option value="2">640 × 400</option>
+          <option value="3">960 × 600</option>
+          <option value="4">1280 × 800</option>
+      </select>
+    </label>
+  </section>
+</body>
+</html>
